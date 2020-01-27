@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import frc.robot.Input.*;
+import frc.robot.Constants;
 /**
  * This class is the glue that binds the controls on the physical operator
  * interface to the commands and command groups that allow control of the robot.
@@ -39,4 +41,50 @@ public class OI {
   // Start the command when the button is released and let it run the command
   // until it is finished as determined by it's isFinished method.
   // button.whenReleased(new ExampleCommand());
+
+  private static final LogitechAttack3Joystick LeftStick = new LogitechAttack3Joystick(RobotMap.LeftStickPort);
+  private static final LogitechAttack3Joystick RightStick = new LogitechAttack3Joystick(RobotMap.RightStickPort);
+  private static final LogitechController Gamepad = new LogitechController(RobotMap.GamepadPort);
+
+  public void RegisterControls() {
+    
+    
+  }
+
+  //Controls for the Robot (Driving)
+  public static double getLeftThrottleInput() {
+    return LeftStick.getYAxis();
+  }
+
+  public static double getRightThrottleInput() {
+    return RightStick.getYAxis(); 
+  }
+
+  public static double getLeftSteeringInput() {
+    return LeftStick.getXAxis();
+  }
+
+  public static double getRightSteeringInput() {
+    return RightStick.getXAxis();
+  }
+
+  //Left
+  public static double getLeftThrottleInputInverted() {
+    return LeftStick.getYAxisInverted();
+  }
+
+  public static double getRightThrottleInputInverted() {
+    return RightStick.getYAxisInverted();
+  }
+
+  public static double getLeftSteeringInputInverted() {
+    return LeftStick.getXAxisInverted();
+  }
+
+  public static double getRightSteeringInputInverted() {
+    return RightStick.getXAxisInverted();
+  }
+
+
+  
 }

@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -14,6 +15,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Limelight;
+import frc.robot.subsystems.DriveTrain;
+import frc.robot.OI;
+import frc.robot.RobotMap;
+import frc.robot.Input.*;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -24,7 +36,13 @@ import frc.robot.subsystems.ExampleSubsystem;
  */
 public class Robot extends TimedRobot {
   public static ExampleSubsystem m_subsystem = new ExampleSubsystem();
+  DriveTrain driveTrain = DriveTrain.getInstance();
+  Limelight limelight = Limelight.getInstance();
   public static OI m_oi;
+  private XboxController m_Controller = new XboxController(2);
+
+  Servo servoCam  = new Servo(9);
+
 
   Command m_autonomousCommand;
   SendableChooser<Command> m_chooser = new SendableChooser<>();
@@ -39,6 +57,8 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", new ExampleCommand());
     // chooser.addOption("My Auto", new MyAutoCommand());
     SmartDashboard.putData("Auto mode", m_chooser);
+
+    driveTrain.setCoast();
   }
 
   /**
@@ -51,7 +71,27 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    NetworkTableEntry tx = table.getEntry("tx");
+    NetworkTableEntry ty = table.getEntry("ty");
+    NetworkTableEntry ta = table.getEntry("ta");
+    NetworkTableEntry tv = table.getEntry("tv");
+
+   // double tv = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0);
+    
+    //read values periodically
+    double x = tx.getDouble(0.0);
+    double y = ty.getDouble(0.0);
+    double area = ta.getDouble(0.0);
+    double vt = tv.getDouble(0.0);
+
+    SmartDashboard.putNumber("LimelightX", x);
+    SmartDashboard.putNumber("LimelightY", y);
+    SmartDashboard.putNumber("LimelightArea", area);
+    SmartDashboard.putNumber("vallidTarget", vt);
   }
+  
 
   /**
    * This function is called once each time the robot enters Disabled mode.
@@ -60,6 +100,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
+    driveTrain.StopDrivetrain();
   }
 
   @Override
@@ -109,9 +150,7 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+    
   }
 
   /**
@@ -120,7 +159,51 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     Scheduler.getInstance().run();
+
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
+
+    limelight.UpdateLimelightTracking();
+    driveTrain.Curvature(OI.getLeftThrottleInput(), OI.getRightSteeringInputInverted());
+
+    //double steer = OI.getRightSteeringInputInverted();
+    //double drive = OI.getLeftThrottleInput();
+    //boolean auto = OI.Gamepad.
+    boolean auto = m_Controller.getBButton();
+
+
+
+    //steer *= 0.70;
+    //drive *= 0.70;
+
+    double tx = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+    double distanceError = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+
+    double kpDistance = 0.1f;
+
+
+
+    if (auto)
+    {
+
+      double heading_error = tx;
+      double steeringAdjust = 0.0f;
+
+      if (tx> 1.0){
+        steeringAdjust = limelight.kp*heading_error - limelight.minCommand;
+      }
+      else if (tx < 1.0){
+        steeringAdjust = limelight.kp*heading_error + limelight.minCommand;
+      }
+      double leftCommand =+ steeringAdjust;
+      double rightCommand =- steeringAdjust;
+      //DriveTrain.mDrive.tankDrive(leftCommand, rightCommand);
+      servoCam.set(steeringAdjust);
+    }
+    
   }
+
 
   /**
    * This function is called periodically during test mode.
