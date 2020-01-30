@@ -198,8 +198,8 @@ public class Robot extends TimedRobot {
       }
       double leftCommand =+ steeringAdjust;
       double rightCommand =- steeringAdjust;
-      //DriveTrain.mDrive.tankDrive(leftCommand, rightCommand);
-      servoCam.set(steeringAdjust);
+      DriveTrain.mDrive.tankDrive(leftCommand, rightCommand);
+      //servoCam.set(steeringAdjust);
     }
     
   }
