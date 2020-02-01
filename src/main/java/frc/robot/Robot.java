@@ -27,6 +27,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
+
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the TimedRobot
@@ -40,6 +42,8 @@ public class Robot extends TimedRobot {
   Limelight limelight = Limelight.getInstance();
   public static OI m_oi;
   private XboxController m_Controller = new XboxController(2);
+
+
 
   Servo servoCam  = new Servo(9);
 
@@ -192,6 +196,7 @@ public class Robot extends TimedRobot {
 
       if (tx> 1.0){
         steeringAdjust = limelight.kp*heading_error - limelight.minCommand;
+
       }
       else if (tx < 1.0){
         steeringAdjust = limelight.kp*heading_error + limelight.minCommand;

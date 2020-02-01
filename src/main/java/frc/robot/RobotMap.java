@@ -30,6 +30,8 @@ public class RobotMap {
   public static final int mDrive_Right_B_ID = 6;
   public static final int mDrive_Right_C_ID = 8;
 
+  public static final int TurrentShooter_ID= 10;
+
   public static final int LeftStickPort = 0;
   public static final int RightStickPort = 1;
   public static final int GamepadPort = 2;
